@@ -33,11 +33,11 @@ setup_easy_rsa() {
 
 # Build the CA and generate server and client certificates
 build_certificates() {
-    mkdir easy-rsa
+    make-cadir easy-rsa
     cp -r /usr/share/easy-rsa/easyrsa .
     ./easyrsa init-pki
-    ./easyrsa build-ca nopass
-    ./easyrsa build-server-full server nopass
+    ./easyrsa build-ca
+    ./easyrsa build-server-full server
     openvpn --genkey --secret ta.key
     ./easyrsa gen-dh
 
