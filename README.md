@@ -7,7 +7,6 @@ This repository contains a bash script to set up an OpenVPN server and generate 
 - `setup_openvpn.sh`: The main bash script to set up the OpenVPN server and generate client configurations.
 - `server.conf`: Configuration file for the OpenVPN server.
 - `client.conf`: Template configuration file for OpenVPN clients.
-- `vars`: Easy-RSA configuration file.
 
 ## Usage
 
@@ -33,14 +32,13 @@ This repository contains a bash script to set up an OpenVPN server and generate 
 ## Example
 
 ```sh
-./setup_openvpn.sh --clients 3 --server_ip 192.168.1.1 --server_port 1194
+./setup_openvpn.sh --clients 3 --server_ip 34.46.173.170 --server_port 1194
 ```
 
 ## Description
 - setup_openvpn.sh: Installs OpenVPN and Easy-RSA, sets up the Easy-RSA environment, builds the CA, server, and client certificates, copies the necessary files to the OpenVPN directory, and creates configuration files.
 - server.conf: Contains the server configuration for OpenVPN.
 - client.conf: Template client configuration, updated with the server IP and port during script execution.
-- vars: Contains Easy-RSA configuration options.
 
 ### Notes
 Ensure that all configuration files are in the same directory as `setup_openvpn.sh` before running the script.

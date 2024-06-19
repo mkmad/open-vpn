@@ -29,14 +29,12 @@ install_dependencies() {
 setup_easy_rsa() {
     mkdir ~/openvpn-ca
     cd ~/openvpn-ca
-
-    # Read vars from external file
-    cp "$SCRIPT_DIR/vars" ./vars
 }
 
 # Build the CA and generate server and client certificates
 build_certificates() {
-    source vars
+    mkdir easy-rsa
+    cp -r /usr/share/easy-rsa/easyrsa .
     ./easyrsa init-pki
     ./easyrsa build-ca nopass
     ./easyrsa build-server-full server nopass
