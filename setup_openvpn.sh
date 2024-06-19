@@ -74,7 +74,7 @@ create_client_conf() {
 # Create .ovpn files for clients
 create_ovpn_files() {
     local clientname=$1
-    local clientovpnpath="/etc/openvpn/client/client$clientname/$clientname.ovpn"
+    local clientovpnpath="/etc/openvpn/client/client$clientname/client$clientname.ovpn"
     cd /etc/openvpn
     cp /etc/openvpn/client/client$clientname/client.conf $clientovpnpath
     sed -i '/ca / s/^/#/' $clientovpnpath
@@ -91,7 +91,7 @@ create_ovpn_files() {
     sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < /etc/openvpn/client//client$clientname/client$clientname.key >> $clientovpnpath
     echo "</key>" >> $clientovpnpath
     echo "<tls-auth>" >> $clientovpnpath
-    sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < /etc/openvpn/client//client$clientname/ta.key >> $clientovpnpath
+    sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < /etc/openvpn/client/client$clientname/ta.key >> $clientovpnpath
     echo "</tls-auth>" >> $clientovpnpath
 }
 
