@@ -54,7 +54,7 @@ copy_files() {
     mkdir -p /etc/openvpn/client
     for i in $(seq 1 $NUM_CLIENTS); do
         mkdir -p /etc/openvpn/client/client$i
-        cp pki/ca.crt pki/private/client$i.key pki/issued/client$i.crt ta.key /etc/openvpn/client/$i/
+        cp pki/ca.crt pki/private/client$i.key pki/issued/client$i.crt ta.key /etc/openvpn/client/client$i/
     done
 }
 
@@ -68,13 +68,13 @@ create_server_conf() {
 create_client_conf() {
     local clientname=$1
 
-    cat "$SCRIPT_DIR/client.conf" | sed "s/clientname/$clientname/g" | sed "s/VPNServerIp/$VPN_SERVER_IP/g" | sed "s/VPNServerPort/$VPN_SERVER_PORT/g" > /etc/openvpn/client/$clientname/client.conf
+    cat "$SCRIPT_DIR/client.conf" | sed "s/clientname/$clientname/g" | sed "s/VPNServerIp/$VPN_SERVER_IP/g" | sed "s/VPNServerPort/$VPN_SERVER_PORT/g" > /etc/openvpn/client/client$clientname/client.conf
 }
 
 # Create .ovpn files for clients
 create_ovpn_files() {
     local clientname=$1
-    local clientovpnpath="/etc/openvpn/client/$clientname/$clientname.ovpn"
+    local clientovpnpath="/etc/openvpn/client/client$clientname/$clientname.ovpn"
     cd /etc/openvpn
     cp /etc/openvpn/client/$clientname/client.conf $clientovpnpath
     sed -i '/ca / s/^/#/' $clientovpnpath
