@@ -34,6 +34,7 @@ setup_easy_rsa() {
 # Build the CA and generate server and client certificates
 build_certificates() {
     make-cadir easy-rsa
+    cd easy-rsa
     ./easyrsa init-pki
     ./easyrsa build-ca nopass
     ./easyrsa build-server-full server nopass
