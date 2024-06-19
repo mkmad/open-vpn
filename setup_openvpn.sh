@@ -85,13 +85,13 @@ create_ovpn_files() {
     sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/ca.crt >> $clientovpnpath
     echo "</ca>" >> $clientovpnpath
     echo "<cert>" >> $clientovpnpath
-    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/issued/client$clientname.crt >> $clientovpnpath
+    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < /etc/openvpn/client//client$clientname/client$clientname.crt >> $clientovpnpath
     echo "</cert>" >> $clientovpnpath
     echo "<key>" >> $clientovpnpath
-    sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < easy-rsa/private/client$clientname.key >> $clientovpnpath
+    sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < /etc/openvpn/client//client$clientname/client$clientname.key >> $clientovpnpath
     echo "</key>" >> $clientovpnpath
     echo "<tls-auth>" >> $clientovpnpath
-    sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < server/ta.key >> $clientovpnpath
+    sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < /etc/openvpn/client//client$clientname/ta.key >> $clientovpnpath
     echo "</tls-auth>" >> $clientovpnpath
 }
 
