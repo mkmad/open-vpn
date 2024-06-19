@@ -69,30 +69,31 @@ create_server_conf() {
 # Create client.conf files
 create_client_conf() {
     local clientname=$1
-    cat "$SCRIPT_DIR/client.conf" | sed "s/clientname/$clientname/g" | sed "s/VPNServerIp/$VPN_SERVER_IP/g" | sed "s/VPNServerPort/$VPN_SERVER_PORT/g" > /etc/openvpn/client/client$clientname/client.conf
+    cat "$SCRIPT_DIR/client.conf" | sed "s/clientname/$clientname/g" | sed "s/VPNServerIp/$VPN_SERVER_IP/g" | sed "s/VPNServerPort/$VPN_SERVER_PORT/g" > /etc/openvpn/client/$clientname/client.conf
 }
 
 # Create .ovpn files for clients
 create_ovpn_files() {
     local clientname=$1
+    local clientovpnpath="/etc/openvpn/$clientname/$clientname.ovpn"
     cd /etc/openvpn
-    cp /etc/openvpn/client/client$clientname/client.conf /etc/openvpn/client$clientname.ovpn
-    sed -i '/ca / s/^/#/' /etc/openvpn/client$clientname.ovpn
-    sed -i '/cert / s/^/#/' /etc/openvpn/client$clientname.ovpn
-    sed -i '/key / s/^/#/' /etc/openvpn/client$clientname.ovpn
-    echo "key-direction 1" >> /etc/openvpn/client$clientname.ovpn
-    echo "<ca>" >> /etc/openvpn/client$clientname.ovpn
-    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/ca.crt >> /etc/openvpn/client$clientname.ovpn
-    echo "</ca>" >> /etc/openvpn/client$clientname.ovpn
-    echo "<cert>" >> /etc/openvpn/client$clientname.ovpn
-    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/issued/$clientname.crt >> /etc/openvpn/client$clientname.ovpn
-    echo "</cert>" >> /etc/openvpn/client$clientname.ovpn
-    echo "<key>" >> /etc/openvpn/client$clientname.ovpn
-    sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < easy-rsa/private/$clientname.key >> /etc/openvpn/client$clientname.ovpn
-    echo "</key>" >> /etc/openvpn/client$clientname.ovpn
-    echo "<tls-auth>" >> /etc/openvpn/client$clientname.ovpn
-    sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < server/ta.key >> /etc/openvpn/client$clientname.ovpn
-    echo "</tls-auth>" >> /etc/openvpn/client$clientname.ovpn
+    cp /etc/openvpn/client/$clientname/client.conf $clientovpnpath
+    sed -i '/ca / s/^/#/' $clientovpnpath
+    sed -i '/cert / s/^/#/' $clientovpnpath
+    sed -i '/key / s/^/#/' $clientovpnpath
+    echo "key-direction 1" >> $clientovpnpath
+    echo "<ca>" >> $clientovpnpath
+    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/ca.crt >> $clientovpnpath
+    echo "</ca>" >> $clientovpnpath
+    echo "<cert>" >> $clientovpnpath
+    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/issued/$clientname.crt >> $clientovpnpath
+    echo "</cert>" >> $clientovpnpath
+    echo "<key>" >> $clientovpnpath
+    sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < easy-rsa/private/$clientname.key >> $clientovpnpath
+    echo "</key>" >> $clientovpnpath
+    echo "<tls-auth>" >> $clientovpnpath
+    sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < server/ta.key >> $clientovpnpath
+    echo "</tls-auth>" >> $clientovpnpath
 }
 
 # Main function to execute all steps

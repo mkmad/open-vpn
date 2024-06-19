@@ -44,4 +44,3 @@ This repository contains a bash script to set up an OpenVPN server and generate 
 
 ### Notes
 Ensure that all configuration files are in the same directory as `setup_openvpn.sh` before running the script.
-The script generates `.ovpn` files for each client in the `/etc/openvpn` directory.
