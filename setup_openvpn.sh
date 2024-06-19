@@ -76,7 +76,7 @@ create_ovpn_files() {
     local clientname=$1
     local clientovpnpath="/etc/openvpn/client/client$clientname/$clientname.ovpn"
     cd /etc/openvpn
-    cp /etc/openvpn/client/$clientname/client.conf $clientovpnpath
+    cp /etc/openvpn/client/client$clientname/client.conf $clientovpnpath
     sed -i '/ca / s/^/#/' $clientovpnpath
     sed -i '/cert / s/^/#/' $clientovpnpath
     sed -i '/key / s/^/#/' $clientovpnpath
@@ -85,10 +85,10 @@ create_ovpn_files() {
     sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/ca.crt >> $clientovpnpath
     echo "</ca>" >> $clientovpnpath
     echo "<cert>" >> $clientovpnpath
-    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/issued/$clientname.crt >> $clientovpnpath
+    sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < easy-rsa/issued/client$clientname.crt >> $clientovpnpath
     echo "</cert>" >> $clientovpnpath
     echo "<key>" >> $clientovpnpath
-    sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < easy-rsa/private/$clientname.key >> $clientovpnpath
+    sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < easy-rsa/private/client$clientname.key >> $clientovpnpath
     echo "</key>" >> $clientovpnpath
     echo "<tls-auth>" >> $clientovpnpath
     sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < server/ta.key >> $clientovpnpath
@@ -105,7 +105,7 @@ main() {
 
     for i in $(seq 1 $NUM_CLIENTS); do
         create_client_conf $i
-        create_ovpn_files client$i
+        create_ovpn_files $i
     done
 
     echo "OpenVPN server and client files have been created, server.conf and client.conf have been configured, and .ovpn files have been generated."
