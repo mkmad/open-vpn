@@ -27,7 +27,7 @@ install_dependencies() {
 
 # Set up the Easy-RSA environment
 setup_easy_rsa() {
-    make-cadir ~/openvpn-ca
+    mkdir ~/openvpn-ca
     cd ~/openvpn-ca
 
     # Read vars from external file
