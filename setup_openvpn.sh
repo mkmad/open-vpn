@@ -87,6 +87,8 @@ build_client_certificates() {
         sed "s/VPNServerPort/$VPN_SERVER_PORT/g" > /etc/openvpn/client/client$clientname/client.conf
     
     # build client certs
+    cd ~/openvpn-ca
+    cd easy-rsa
     ./easyrsa build-client-full client$clientname nopass
 
     # copy client certs to the server
