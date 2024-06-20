@@ -139,7 +139,7 @@ main() {
     # Execute client setup if --client-only or no specific option is provided
     if [[ "$CLIENT_ONLY" == true ]]; then
         for i in $(seq 1 $NUM_CLIENTS); do
-            Generate a unique client identifier
+            # Generate a unique client identifier
             client_uuid=$(uuidgen | cut -d'-' -f1)
 
             build_client_certificates "-${client_uuid}"
