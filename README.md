@@ -8,6 +8,11 @@ This repository contains a bash script to set up an OpenVPN server and generate 
 - `server.conf`: Configuration file for the OpenVPN server.
 - `client.conf`: Template configuration file for OpenVPN clients.
 
+## Description
+- setup_openvpn.sh: Installs OpenVPN and Easy-RSA, sets up the Easy-RSA environment, builds the CA, server, and client certificates, copies the necessary files to the OpenVPN directory, and creates configuration files.
+- server.conf: Contains the server configuration for OpenVPN.
+- client.conf: Template client configuration, updated with the server IP and port during script execution.
+
 ## Usage
 
 1. Clone the repository:
@@ -35,10 +40,22 @@ This repository contains a bash script to set up an OpenVPN server and generate 
 ./setup_openvpn.sh --clients 3 --server_ip 34.46.173.170 --server_port 1194
 ```
 
-## Description
-- setup_openvpn.sh: Installs OpenVPN and Easy-RSA, sets up the Easy-RSA environment, builds the CA, server, and client certificates, copies the necessary files to the OpenVPN directory, and creates configuration files.
-- server.conf: Contains the server configuration for OpenVPN.
-- client.conf: Template client configuration, updated with the server IP and port during script execution.
+## Start OpenVPN Server
+
+```
+openvpn --config server.conf
+```
+
+After the server is running, use the ovpn files for any of the clients to connect and establish a VPN tunnel with the server.
+
+#### MAX Concurrent Connections
+
+Modify the `max-clients` parameter in the `server.conf` file to limit the maximum number of conncurrent connections to the VPN server.
+
+E.g.
+```
+max-clients 100 # Limit server to a maximum of n concurrent clients.
+```
 
 ### Notes
 Ensure that all configuration files are in the same directory as `setup_openvpn.sh` before running the script.
