@@ -46,10 +46,13 @@ setup_easy_rsa() {
     mkdir ~/openvpn-ca
     cd ~/openvpn-ca
 
-    # init easy-rsa
+    # create rsa dir
     make-cadir easy-rsa
     cd easy-rsa
+    # init easy-rsa
     ./easyrsa init-pki
+    # create CA and server certs using easy-rsa
+    ./easyrsa build-ca nopass
 }
 
 # Build the CA and generate server certificates (including server.conf)
@@ -57,8 +60,7 @@ build_server_certificates() {
     # Read server.conf from external file
     cp "$SCRIPT_DIR/server.conf" /etc/openvpn/server.conf
 
-    # create CA and server certs using easy-rsa
-    ./easyrsa build-ca nopass
+    # create server certs using easy-rsa
     ./easyrsa build-server-full server nopass
     openvpn --genkey --secret ta.key
     ./easyrsa gen-dh
