@@ -46,6 +46,13 @@ setup_easy_rsa() {
     mkdir ~/openvpn-ca
     cd ~/openvpn-ca
 
+    local easy_rsa_dir="~/openvpn-ca/easy-rsa"
+    # Check if easy-rsa directory exists, skip setup if it does
+    if [ -d "$easy_rsa_dir" ]; then
+        echo "Easy-RSA directory already exists. Skipping setup."
+        return
+    fi
+
     # create rsa dir
     make-cadir easy-rsa
     cd easy-rsa
