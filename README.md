@@ -31,8 +31,10 @@ This repository contains a bash script to set up an OpenVPN server and generate 
 3. Run the script with the required parameters:
 
     ```sh
-    ./setup_openvpn.sh --clients <number_of_clients> --server_ip <OpenVPN_server_IP> --server_port <OpenVPN_server_port>
+    ./setup_openvpn.sh --clients <number_of_clients> --server_ip <OpenVPN_server_IP> --server_port <OpenVPN_server_port> [--server-only | --client-only]
     ```
+
+    Use `--server-only` to execute server setup only, `--client-only` to execute client setup only, or omit both to execute both setups sequentially.
 
 ## Example
 
