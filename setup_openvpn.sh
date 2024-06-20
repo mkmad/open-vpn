@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Default values for parameters
-SERVER_ONLY=false
-CLIENT_ONLY=false
+SERVER_ONLY=true
+CLIENT_ONLY=true
 NUM_CLIENTS=
 VPN_SERVER_IP=
 VPN_SERVER_PORT=
@@ -13,8 +13,8 @@ while [[ "$#" -gt 0 ]]; do
         --clients) NUM_CLIENTS="$2"; shift ;;
         --server_ip) VPN_SERVER_IP="$2"; shift ;;
         --server_port) VPN_SERVER_PORT="$2"; shift ;;
-        --server-only) SERVER_ONLY=true ;;
-        --client-only) CLIENT_ONLY=true ;;
+        --server-only) CLIENT_ONLY=false  ;;
+        --client-only) SERVER_ONLY=false ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -129,12 +129,6 @@ main() {
         exit 1
     fi
 
-    # Default to executing both server and client setup if no specific option is provided
-    if [[ -z "$SERVER_ONLY" && -z "$CLIENT_ONLY" ]]; then
-        SERVER_ONLY=true
-        CLIENT_ONLY=true
-    fi
-
     # Execute server setup if --server-only or no specific option is provided
     if [[ "$SERVER_ONLY" == true ]]; then
         install_dependencies
@@ -145,7 +139,7 @@ main() {
     # Execute client setup if --client-only or no specific option is provided
     if [[ "$CLIENT_ONLY" == true ]]; then
         for i in $(seq 1 $NUM_CLIENTS); do
-            # Generate a unique client identifier
+            Generate a unique client identifier
             client_uuid=$(uuidgen | cut -d'-' -f1)
 
             build_client_certificates "-${client_uuid}"
