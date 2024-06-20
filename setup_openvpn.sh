@@ -1,15 +1,30 @@
 #!/bin/bash
 
+# Default values for parameters
+SERVER_ONLY=false
+CLIENT_ONLY=false
+NUM_CLIENTS=
+VPN_SERVER_IP=
+VPN_SERVER_PORT=
+
 # Parse named parameters
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --clients) NUM_CLIENTS="$2"; shift ;;
         --server_ip) VPN_SERVER_IP="$2"; shift ;;
         --server_port) VPN_SERVER_PORT="$2"; shift ;;
+        --server-only) SERVER_ONLY=true ;;
+        --client-only) CLIENT_ONLY=true ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
+
+# Validate required parameters if needed
+if [[ "$CLIENT_ONLY" == true && -z "$NUM_CLIENTS" ]]; then
+    echo "Error: Number of clients (--clients) must be specified when using --client-only."
+    exit 1
+fi
 
 if [ -z "$NUM_CLIENTS" ] || [ -z "$VPN_SERVER_IP" ] || [ -z "$VPN_SERVER_PORT" ]; then
     echo "Usage: $0 --clients <number_of_clients> --server_ip <OpenVPN_server_IP> --server_port <OpenVPN_server_port>"
@@ -27,48 +42,53 @@ install_dependencies() {
 
 # Set up the Easy-RSA environment
 setup_easy_rsa() {
+    # setup easy-rsa staging area
     mkdir ~/openvpn-ca
     cd ~/openvpn-ca
-}
 
-# Build the CA and generate server and client certificates
-build_certificates() {
+    # init easy-rsa
     make-cadir easy-rsa
     cd easy-rsa
     ./easyrsa init-pki
+}
+
+# Build the CA and generate server certificates (including server.conf)
+build_server_certificates() {
+    # Read server.conf from external file
+    cp "$SCRIPT_DIR/server.conf" /etc/openvpn/server.conf
+
+    # create CA and server certs using easy-rsa
     ./easyrsa build-ca nopass
     ./easyrsa build-server-full server nopass
     openvpn --genkey --secret ta.key
     ./easyrsa gen-dh
 
-    for i in $(seq 1 $NUM_CLIENTS); do
-        ./easyrsa build-client-full client$i nopass
-    done
-}
-
-# Copy files to OpenVPN directory
-copy_files() {
+    # copy server files to OpenVPN directory
     mkdir -p /etc/openvpn/easy-rsa
     cp pki/ca.crt pki/private/server.key pki/issued/server.crt pki/dh.pem /etc/openvpn/easy-rsa/
     cp ta.key /etc/openvpn/server/
-    mkdir -p /etc/openvpn/client
-    for i in $(seq 1 $NUM_CLIENTS); do
-        mkdir -p /etc/openvpn/client/client$i
-        cp pki/ca.crt pki/private/client$i.key pki/issued/client$i.crt ta.key /etc/openvpn/client/client$i/
-    done
 }
 
-# Create server.conf file
-create_server_conf() {
-    # Read server.conf from external file
-    cp "$SCRIPT_DIR/server.conf" /etc/openvpn/server.conf
-}
 
-# Create client.conf files
-create_client_conf() {
+# Build client.conf and certificate files
+build_client_certificates() {
     local clientname=$1
 
-    cat "$SCRIPT_DIR/client.conf" | sed "s/clientname/$clientname/g" | sed "s/VPNServerIp/$VPN_SERVER_IP/g" | sed "s/VPNServerPort/$VPN_SERVER_PORT/g" > /etc/openvpn/client/client$clientname/client.conf
+    # create client files
+    mkdir -p /etc/openvpn/client
+    mkdir -p /etc/openvpn/client/client$clientname
+
+    # copy client conf
+    cat "$SCRIPT_DIR/client.conf" | \
+        sed "s/clientname/$clientname/g" | \
+        sed "s/VPNServerIp/$VPN_SERVER_IP/g" | \
+        sed "s/VPNServerPort/$VPN_SERVER_PORT/g" > /etc/openvpn/client/client$clientname/client.conf
+    
+    # build client certs
+    ./easyrsa build-client-full client$clientname nopass
+
+    # copy client certs to the server
+    cp pki/ca.crt pki/private/client$clientname.key pki/issued/client$clientname.crt ta.key /etc/openvpn/client/client$clientname/
 }
 
 # Create .ovpn files for clients
@@ -97,16 +117,41 @@ create_ovpn_files() {
 
 # Main function to execute all steps
 main() {
-    install_dependencies
-    setup_easy_rsa
-    build_certificates
-    copy_files
-    create_server_conf
 
-    for i in $(seq 1 $NUM_CLIENTS); do
-        create_client_conf $i
-        create_ovpn_files $i
-    done
+    # Validate numerical parameters
+    if ! [[ "$NUM_CLIENTS" =~ ^[1-9][0-9]*$ ]]; then
+        echo "Error: Number of clients must be a positive integer."
+        exit 1
+    fi
+
+    if ! [[ "$VPN_SERVER_PORT" =~ ^[1-9][0-9]*$ ]]; then
+        echo "Error: VPN server port must be a positive integer."
+        exit 1
+    fi
+
+    # Default to executing both server and client setup if no specific option is provided
+    if [[ -z "$SERVER_ONLY" && -z "$CLIENT_ONLY" ]]; then
+        SERVER_ONLY=true
+        CLIENT_ONLY=true
+    fi
+
+    # Execute server setup if --server-only or no specific option is provided
+    if [[ "$SERVER_ONLY" == true ]]; then
+        install_dependencies
+        setup_easy_rsa
+        build_server_certificates
+    fi
+
+    # Execute client setup if --client-only or no specific option is provided
+    if [[ "$CLIENT_ONLY" == true ]]; then
+        for i in $(seq 1 $NUM_CLIENTS); do
+            # Generate a unique client identifier
+            client_uuid=$(uuidgen | cut -d'-' -f1)
+
+            build_client_certificates "-${client_uuid}"
+            create_ovpn_files "-${client_uuid}"
+        done
+    fi    
 
     echo "OpenVPN server and client files have been created, server.conf and client.conf have been configured, and .ovpn files have been generated."
 }
