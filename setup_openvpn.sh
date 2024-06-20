@@ -129,10 +129,11 @@ main() {
         exit 1
     fi
 
+    install_dependencies
+    setup_easy_rsa
+
     # Execute server setup if --server-only or no specific option is provided
     if [[ "$SERVER_ONLY" == true ]]; then
-        install_dependencies
-        setup_easy_rsa
         build_server_certificates
     fi
 
