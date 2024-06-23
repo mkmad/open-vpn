@@ -65,6 +65,7 @@ setup_easy_rsa() {
 
 # Build the CA and generate server certificates (including server.conf)
 build_server_certificates() {
+    cd ~/openvpn-ca
     # Read server.conf from external file
     cp "$SCRIPT_DIR/server.conf" /etc/openvpn/server.conf
 
@@ -84,6 +85,7 @@ build_server_certificates() {
 build_client_certificates() {
     local clientname=$1
 
+    cd ~/openvpn-ca
     # create client files
     mkdir -p /etc/openvpn/client
     mkdir -p /etc/openvpn/client/client$clientname
