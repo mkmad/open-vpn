@@ -46,8 +46,9 @@ setup_easy_rsa() {
     mkdir ~/openvpn-ca
     cd ~/openvpn-ca
 
-    local easy_rsa_dir="~/openvpn-ca/easy-rsa"
+    local easy_rsa_dir=~/openvpn-ca/easy-rsa
     # Check if easy-rsa directory exists, skip setup if it does
+
     if [ -d "$easy_rsa_dir" ]; then
         echo "Easy-RSA directory already exists. Skipping setup."
         return
@@ -59,7 +60,7 @@ setup_easy_rsa() {
     # init easy-rsa
     ./easyrsa init-pki
     # create CA and server certs using easy-rsa
-    ./easyrsa build-ca nopass
+    echo "open-vpn-server" | ./easyrsa build-ca nopass
 }
 
 # Build the CA and generate server certificates (including server.conf)

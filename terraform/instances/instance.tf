@@ -12,17 +12,32 @@ variable "service_account_email" {
 
 variable "zone" {
   description = "The GCP zone"
-  default     = "us-central1-a"
+}
+
+variable "instance_tag" {
+  description = "The network tag to apply to the instance and firewall rule"
+}
+
+variable "instance_image_name" {
+  description = "The instance image used to create the VM instance"
+}
+
+variable "instance_name" {
+  description = "The instance image used to create the VM instance"
+}
+
+variable "instance_port" {
+  description = "The instance image used to create the VM instance"
 }
 
 resource "google_compute_instance" "openvpn_instance" {
-  name         = "openvpn-instance"
+  name         = var.instance_name
   machine_type = "e2-medium"
   zone         = var.zone
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-2004-focal-v20220406"
+      image = var.instance_image_name
     }
   }
 
@@ -39,6 +54,8 @@ resource "google_compute_instance" "openvpn_instance" {
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 
+  tags = [var.instance_tag]
+
   metadata_startup_script = <<-EOF
     #cloud-config
     runcmd:
@@ -46,11 +63,11 @@ resource "google_compute_instance" "openvpn_instance" {
         if [ ! -f /var/log/first-boot.log ]; then
           sudo apt update
           sudo apt install -y git
-          git clone https://github.com/mkmad/open-vpn.git /home/${USER}/open-vpn
-          cd /home/${USER}/open-vpn
-          chmod +x setup_openvpn.sh
-          ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port 1194
-          touch /var/log/first-boot.log
+          sudo git clone https://github.com/mkmad/open-vpn.git /home/$(whoami)/open-vpn
+          cd /home/$(whoami)/open-vpn
+          sudo chmod +x setup_openvpn.sh
+          sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port}
+          sudo touch /var/log/first-boot.log
         fi
   EOF
 }

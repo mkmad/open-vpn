@@ -1,4 +1,4 @@
-# OpenVPN Setup Script
+# OpenVPN Setup
 
 This repository contains a bash script to set up an OpenVPN server and generate client configuration files. The script accepts parameters for the number of clients, the OpenVPN server IP, and the OpenVPN server port.
 

@@ -1,9 +1,9 @@
-resource "google_compute_network" "vpc_network" {
-  name = "openvpn-network"
-}
-
 variable "region" {
   description = "The GCP region"
+}
+
+resource "google_compute_network" "vpc_network" {
+  name = "openvpn-network"
 }
 
 resource "google_compute_address" "static_ip" {
