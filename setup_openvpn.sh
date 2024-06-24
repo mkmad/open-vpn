@@ -72,7 +72,7 @@ build_ca() {
 build_server_certificates() {
     cd ~/openvpn-ca/easy-rsa
     # Read server.conf from external file
-    cp "$SCRIPT_DIR/server.conf" /etc/openvpn/server.conf
+    cp "$SCRIPT_DIR/server.conf" /etc/openvpn/server/server.conf
 
     # create server certs using easy-rsa
     ./easyrsa build-server-full server nopass
