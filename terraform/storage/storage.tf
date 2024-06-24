@@ -15,13 +15,19 @@ variable "bucket_name" {
 }
 
 resource "google_storage_bucket" "openvpn_bucket" {
-  name     = "${var.bucket_name}-66-${var.project_id}"
+  name     = "${var.bucket_name}-${var.project_id}"
   location = var.region
 }
 
 resource "google_storage_bucket_iam_member" "bucket_writer" {
   bucket = google_storage_bucket.openvpn_bucket.name
   role   = "roles/storage.objectCreator"
+  member = "serviceAccount:${var.service_account_email}"
+}
+
+resource "google_storage_bucket_iam_member" "bucket_reader" {
+  bucket = google_storage_bucket.openvpn_bucket.name
+  role   = "roles/storage.objectViewer"
   member = "serviceAccount:${var.service_account_email}"
 }
 

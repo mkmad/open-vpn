@@ -90,6 +90,15 @@ NOTE: `SERVER_IP` is the reserved static IP thats assigned to the VM instance in
 openvpn --config server.conf
 ```
 
+## OpenVPN service (Ubuntu)
+
+Stoping and Starting OpenVPN server can be handled by `systemctl`.
+Note: `server.conf` is already moved to `/etc/openvpn/server/server.conf`. This is the OpenVPN server config used by `systemctl`
+```sh
+sudo systemctl stop openvpn-server@server.service
+sudo systemctl start openvpn-server@server.service 
+```
+
 After the server is running, use the ovpn files for any of the clients to connect and establish a VPN tunnel with the server.
 
 #### MAX Concurrent Connections
