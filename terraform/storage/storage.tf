@@ -15,7 +15,7 @@ variable "bucket_name" {
 }
 
 resource "google_storage_bucket" "openvpn_bucket" {
-  name     = "${var.bucket_name}-${var.project_id}"
+  name     = "${var.bucket_name}-66-${var.project_id}"
   location = var.region
 }
 
