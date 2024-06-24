@@ -69,5 +69,7 @@ resource "google_compute_instance" "openvpn_instance" {
           sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port}
           sudo touch /var/log/first-boot.log
         fi
+        sudo systemctl stop openvpn-server@server.service
+        sudo systemctl start openvpn-server@server.service        
   EOF
 }
