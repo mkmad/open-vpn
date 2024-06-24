@@ -10,8 +10,12 @@ variable "region" {
   description = "The GCP region"
 }
 
+variable "bucket_name" {
+  description = "The bucket name used to store ovpn files"
+}
+
 resource "google_storage_bucket" "openvpn_bucket" {
-  name     = "openvpn-bucket-${var.project_id}"
+  name     = "${var.bucket_name}-${var.project_id}"
   location = var.region
 }
 

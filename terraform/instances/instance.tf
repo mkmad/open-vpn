@@ -30,6 +30,10 @@ variable "instance_port" {
   description = "The instance image used to create the VM instance"
 }
 
+variable "bucket_name" {
+  description = "The bucket name used to store ovpn files"
+}
+
 resource "google_compute_instance" "openvpn_instance" {
   name         = var.instance_name
   machine_type = "e2-medium"
@@ -66,7 +70,7 @@ resource "google_compute_instance" "openvpn_instance" {
           sudo git clone https://github.com/mkmad/open-vpn.git /home/$(whoami)/open-vpn
           cd /home/$(whoami)/open-vpn
           sudo chmod +x setup_openvpn.sh
-          sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port}
+          sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port} --bucket_name ${var.bucket_name}
           sudo touch /var/log/first-boot.log
         fi
         sudo systemctl stop openvpn-server@server.service

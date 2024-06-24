@@ -6,6 +6,7 @@ CLIENT_ONLY=true
 NUM_CLIENTS=
 VPN_SERVER_IP=
 VPN_SERVER_PORT=
+BUCKET_NAME=
 
 # Parse named parameters
 while [[ "$#" -gt 0 ]]; do
@@ -13,6 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         --clients) NUM_CLIENTS="$2"; shift ;;
         --server_ip) VPN_SERVER_IP="$2"; shift ;;
         --server_port) VPN_SERVER_PORT="$2"; shift ;;
+        --bucket_name) BUCKET_NAME="$2"; shift ;;
         --server-only) CLIENT_ONLY=false  ;;
         --client-only) SERVER_ONLY=false ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
@@ -26,8 +28,8 @@ if [[ "$CLIENT_ONLY" == true && -z "$NUM_CLIENTS" ]]; then
     exit 1
 fi
 
-if [ -z "$NUM_CLIENTS" ] || [ -z "$VPN_SERVER_IP" ] || [ -z "$VPN_SERVER_PORT" ]; then
-    echo "Usage: $0 --clients <number_of_clients> --server_ip <OpenVPN_server_IP> --server_port <OpenVPN_server_port>"
+if [ -z "$NUM_CLIENTS" ] || [ -z "$VPN_SERVER_IP" ] || [ -z "$VPN_SERVER_PORT" ] || [ -z "$BUCKET_NAME" ]; then
+    echo "Usage: $0 --clients <number_of_clients> --server_ip <OpenVPN_server_IP> --server_port <OpenVPN_server_port> --bucket_name <GCS_bucket_name> [--server-only | --client-only]"
     exit 1
 fi
 
@@ -37,7 +39,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Install OpenVPN and Easy-RSA
 install_dependencies() {
     apt-get update
-    apt-get install -y openvpn easy-rsa
+    apt-get install -y openvpn easy-rsa apt-transport-https ca-certificates gnupg curl
+
+    if ! command -v gsutil &> /dev/null; then
+        echo "gsutil not found, installing Google Cloud SDK..."
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        sudo apt-get update && sudo apt-get install google-cloud-cli
+    fi    
+
 }
 
 # Set up the Easy-RSA environment
@@ -132,6 +142,9 @@ create_ovpn_files() {
     echo "<tls-auth>" >> $clientovpnpath
     sed -n '/BEGIN OpenVPN Static key V1/,/END OpenVPN Static key V1/p' < /etc/openvpn/client/client$clientname/ta.key >> $clientovpnpath
     echo "</tls-auth>" >> $clientovpnpath
+
+    # Upload the .ovpn file to the Cloud Storage bucket
+    gsutil cp $clientovpnpath gs://$BUCKET_NAME/clients/client$clientname.ovpn    
 }
 
 # Main function to execute all steps

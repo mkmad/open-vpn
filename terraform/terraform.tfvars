@@ -9,3 +9,6 @@ instance_tag        = "openvpn-instance"
 instance_image_name = "ubuntu-2004-focal-v20240614"
 instance_name       = "openvpn-instance"
 instance_port       = "1194"
+
+# Bucket Vars
+bucket_name         = "openvpn-bucket"

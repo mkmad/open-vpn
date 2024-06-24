@@ -18,6 +18,7 @@ module "storage" {
   project_id            = var.project_id
   region                = var.region
   service_account_email = module.service_account.email
+  bucket_name           = var.bucket_name
 }
 
 module "instance" {
@@ -30,4 +31,5 @@ module "instance" {
   instance_image_name   = var.instance_image_name
   instance_name         = var.instance_name
   instance_port         = var.instance_port
+  bucket_name           = module.storage.bucket_name
 }

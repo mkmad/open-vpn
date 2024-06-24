@@ -31,3 +31,8 @@ variable "instance_port" {
   description = "The instance image used to create the VM instance"
   default     = "1194"
 }
+
+variable "bucket_name" {
+  description = "The bucket name used to store ovpn files"
+  default     = "openvpn-bucket"
+}

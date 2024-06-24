@@ -70,6 +70,7 @@ Run the following script with the required parameters if you need to `recreate` 
     --clients <number_of_clients> \
     --server_ip <OpenVPN_server_IP> \
     --server_port <OpenVPN_server_port> \
+    --bucket_name <GCS_bucket_name> \
     [--server-only | --client-only]
 ```
 
@@ -78,7 +79,7 @@ Run the following script with the required parameters if you need to `recreate` 
 ### Example (Create both server and client config files)
 
 ```sh
-./setup_openvpn.sh --clients 3 --server_ip <SERVER_IP> --server_port 1194
+./setup_openvpn.sh --clients 3 --server_ip <SERVER_IP> --server_port 1194 --bucket_name open-vpn-storage
 ```
 
 NOTE: `SERVER_IP` is the reserved static IP thats assigned to the VM instance in the terraform step.
