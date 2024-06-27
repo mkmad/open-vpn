@@ -2,8 +2,7 @@
 
 This repository contains a bash script to set up an OpenVPN server and generate client configuration files. The script accepts parameters for the number of clients, the OpenVPN server IP, and the OpenVPN server port.
 
-Additionally, the repository includes Terraform configurations to automate the setup of the required GCP resources including a VM instance, a service account, firewall rules, and a Cloud Storage bucket.
-
+Additionally, the repository includes Terraform configurations to automate the setup of the required GCP resources including a VM instance, a service account, firewall rules, and a Cloud Storage bucket (to store the client configuration files).
 
 ## Files Included
 
@@ -59,9 +58,11 @@ The Terraform configuration in this repository automates the setup of the requir
 
 4. Follow the prompts to confirm the deployment.
 
-## OpenVPN Setup
+**Note:** Terraform will install all the necessary binaries, create config files and the startup script will also push all the client files to the storage bucket for easy maintainence.
 
-All the OpenVPN setup steps are taken care of by the VM script during Terraform instance creation.
+## OpenVPN Setup (Manually)
+
+All the OpenVPN setup steps are taken care by the VM's **startup script** during Terraform instance creation.
 
 Run the following script with the required parameters if you need to `recreate` the OpenVPN server or Client configuration files:
 
@@ -82,13 +83,9 @@ Run the following script with the required parameters if you need to `recreate` 
 ./setup_openvpn.sh --clients 3 --server_ip <SERVER_IP> --server_port 1194 --bucket_name open-vpn-storage
 ```
 
-NOTE: `SERVER_IP` is the reserved static IP thats assigned to the VM instance in the terraform step.
+**NOTE:** `SERVER_IP` is the reserved static IP thats assigned to the VM instance in the terraform step.
 
-## Start OpenVPN Server manually for testing
-
-```sh
-openvpn --config server.conf
-```
+**Also Note:** Terraform will install all the necessary binaries, create config files and the startup script will also push all the client files to the storage bucket for easy maintainence.
 
 ## OpenVPN service (Ubuntu)
 
@@ -101,6 +98,14 @@ sudo systemctl start openvpn-server@server.service
 
 After the server is running, use the ovpn files for any of the clients to connect and establish a VPN tunnel with the server.
 
+## Start OpenVPN Server manually for testing
+
+First stop the openVPN server using the `systemctl` from above, modify the `server.conf` based on your needs and run the following command.
+
+```sh
+openvpn --config <path to server.conf>
+```
+
 #### MAX Concurrent Connections
 
 Modify the `max-clients` parameter in the `server.conf` file to limit the maximum number of conncurrent connections to the VPN server.
@@ -109,6 +114,3 @@ E.g.
 ```
 max-clients 100 # Limit server to a maximum of n concurrent clients.
 ```
-
-### Notes
-Ensure that all configuration files are in the same directory as `setup_openvpn.sh` before running the script.
