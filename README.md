@@ -87,6 +87,15 @@ Run the following script with the required parameters if you need to `recreate` 
 
 **Also Note:** Terraform will install all the necessary binaries, create config files and the startup script will also push all the client files to the storage bucket for easy maintainence.
 
+#### MAX Concurrent Connections
+
+Modify the `max-clients` parameter in the `server.conf` file to limit the maximum number of conncurrent connections to the VPN server.
+
+E.g.
+```
+max-clients 100 # Limit server to a maximum of n concurrent clients.
+```
+
 ## OpenVPN service (Ubuntu)
 
 Stoping and Starting OpenVPN server can be handled by `systemctl`.
@@ -106,11 +115,27 @@ First stop the openVPN server using the `systemctl` from above, modify the `serv
 openvpn --config <path to server.conf>
 ```
 
-#### MAX Concurrent Connections
+## Connect to OpenVPN server using the ovpn file from command line
 
-Modify the `max-clients` parameter in the `server.conf` file to limit the maximum number of conncurrent connections to the VPN server.
+To connect to an OpenVPN server using a .ovpn file on an Ubuntu machine, you will need to have the OpenVPN client installed and then use the .ovpn configuration file to establish the connection. Here’s a step-by-step guide:
 
-E.g.
+**Step 1: Install OpenVPN**
+
+Open your terminal and install the OpenVPN client by running:
+
 ```
-max-clients 100 # Limit server to a maximum of n concurrent clients.
+sudo apt update 
+sudo apt install openvpn
+```
+
+**Step 2: Locate Your .ovpn File**
+
+Make sure you know where your `.ovpn` file is located on your machine. You might have received this file from your network administrator or downloaded it from a secure location.
+
+**Step 3: Start the OpenVPN Connection**
+
+To start the VPN connection, use the following command in the terminal. You need to replace `/path/to/your/file.ovpn` with the actual path to your `.ovpn` file:
+
+```
+sudo openvpn --config /path/to/your/file.ovpn
 ```
