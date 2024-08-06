@@ -123,6 +123,10 @@ resource "google_compute_firewall" "allow-outbound-urls" {
   direction = "EGRESS"
   target_tags = [var.instance_tag]
 
+  # Fetched most of the IPs from:
+  # 1. https://support.google.com/a/answer/10026322?hl=en
+  # 2. https://www.gstatic.com/ipranges/cloud.json
+  # 3. https://www.gstatic.com/ipranges/goog.json
   destination_ranges = [
     "8.8.4.0/24",       # IP range for google.com
     "8.8.8.0/24",       # IP range for google.com
