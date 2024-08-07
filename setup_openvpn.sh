@@ -39,7 +39,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Install OpenVPN and Easy-RSA
 install_dependencies() {
     apt-get update
-    apt-get install -y openvpn easy-rsa apt-transport-https ca-certificates gnupg curl
+    apt-get install -y openvpn easy-rsa
 
     if ! command -v gsutil &> /dev/null; then
         echo "gsutil not found, installing Google Cloud SDK..."

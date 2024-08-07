@@ -34,6 +34,11 @@ variable "bucket_name" {
   description = "The bucket name used to store ovpn files"
 }
 
+variable "objects" {
+  type = list(string)
+  description = "The objects to pull from storage during startup"
+}
+
 resource "google_compute_instance" "openvpn_instance" {
   name         = var.instance_name
   machine_type = "e2-medium"
@@ -65,10 +70,17 @@ resource "google_compute_instance" "openvpn_instance" {
     runcmd:
       - |
         if [ ! -f /var/log/first-boot.log ]; then
+          #install gsutil
           sudo apt update
-          sudo apt install -y git
-          sudo git clone https://github.com/mkmad/open-vpn.git /home/$(whoami)/open-vpn
+          sudo apt install -y apt-transport-https ca-certificates gnupg curl
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          sudo apt-get update && sudo apt-get install -y google-cloud-cli
+
           cd /home/$(whoami)/open-vpn
+          %{ for obj in var.objects }
+          gsutil cp gs://${var.bucket_name}/${obj} ${obj}
+          %{ endfor }
           sudo chmod +x setup_openvpn.sh
           sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port} --bucket_name ${var.bucket_name}
           sudo touch /var/log/first-boot.log
