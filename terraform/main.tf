@@ -19,6 +19,24 @@ module "storage" {
   region                = var.region
   service_account_email = module.service_account.email
   bucket_name           = var.bucket_name
+  objects = [ 
+    {
+      name = "setup_openvpn.sh"
+      content = file("${path.root}/../setup_openvpn.sh")
+    },
+    {
+      name = "server.conf"
+      content = file("${path.root}/../server.conf")
+    },
+    {
+      name = "client.conf"
+      content = file("${path.root}/../client.conf")
+    },
+    {
+      name = "vars"
+      content = file("${path.root}/../vars")
+    }
+   ]
 }
 
 module "instance" {
@@ -32,4 +50,10 @@ module "instance" {
   instance_name         = var.instance_name
   instance_port         = var.instance_port
   bucket_name           = module.storage.bucket_name
+  objects = [ 
+    "setup_openvpn.sh",
+    "server.conf",
+    "client.conf",
+    "vars",
+   ]
 }
