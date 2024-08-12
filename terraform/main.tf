@@ -1,3 +1,12 @@
+locals {
+  ovpn_files = {
+    "setup_openvpn.sh" = "${path.root}/../setup_openvpn.sh",
+    "server.conf"      = "${path.root}/../server.conf",
+    "client.conf"      = "${path.root}/../client.conf",
+    "vars"             = "${path.root}/../vars"
+  }
+}
+
 module "network" {
   source = "./network"
   region = var.region
@@ -10,7 +19,9 @@ module "firewall" {
 }
 
 module "service_account" {
-  source = "./service_account"
+  source      = "./service_account"
+  bucket_name = var.bucket_name
+  project_id  = var.project_id
 }
 
 module "storage" {
@@ -19,6 +30,7 @@ module "storage" {
   region                = var.region
   service_account_email = module.service_account.email
   bucket_name           = var.bucket_name
+  ovpn_files            = local.ovpn_files
 }
 
 module "instance" {
@@ -32,4 +44,5 @@ module "instance" {
   instance_name         = var.instance_name
   instance_port         = var.instance_port
   bucket_name           = module.storage.bucket_name
+  ovpn_files            = local.ovpn_files
 }

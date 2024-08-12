@@ -23,15 +23,20 @@ variable "instance_image_name" {
 }
 
 variable "instance_name" {
-  description = "The instance image used to create the VM instance"
+  description = "The instance name used to create the VM instance"
 }
 
 variable "instance_port" {
-  description = "The instance image used to create the VM instance"
+  description = "The port used by the instance"
 }
 
 variable "bucket_name" {
   description = "The bucket name used to store ovpn files"
+}
+
+variable "ovpn_files" {
+  description = "Map of OpenVPN configuration files to be downloaded"
+  type = map(string)
 }
 
 resource "google_compute_instance" "openvpn_instance" {
@@ -66,8 +71,13 @@ resource "google_compute_instance" "openvpn_instance" {
       - |
         if [ ! -f /var/log/first-boot.log ]; then
           sudo apt update
-          sudo apt install -y git
-          sudo git clone https://github.com/mkmad/open-vpn.git /home/$(whoami)/open-vpn
+          sudo apt install -y wget
+          mkdir -p /home/$(whoami)/open-vpn
+
+          for file in ${join(" ", keys(var.ovpn_files))}; do
+            gsutil cp gs://${var.bucket_name}/$file /home/$(whoami)/open-vpn/
+          done
+          
           cd /home/$(whoami)/open-vpn
           sudo chmod +x setup_openvpn.sh
           sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port} --bucket_name ${var.bucket_name}
