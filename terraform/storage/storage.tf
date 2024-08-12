@@ -2,16 +2,21 @@ variable "project_id" {
   description = "The GCP project ID"
 }
 
-variable "service_account_email" {
-  description = "The service account email"
-}
-
 variable "region" {
   description = "The GCP region"
 }
 
+variable "service_account_email" {
+  description = "The service account email"
+}
+
 variable "bucket_name" {
   description = "The bucket name used to store ovpn files"
+}
+
+variable "ovpn_files" {
+  description = "Map of OpenVPN configuration files to be stored"
+  type = map(string)
 }
 
 resource "google_storage_bucket" "openvpn_bucket" {
@@ -25,10 +30,12 @@ resource "google_storage_bucket_iam_member" "bucket_writer" {
   member = "serviceAccount:${var.service_account_email}"
 }
 
-resource "google_storage_bucket_iam_member" "bucket_reader" {
+resource "google_storage_bucket_object" "ovpn_files" {
+  for_each = var.ovpn_files
+
+  name   = each.key
   bucket = google_storage_bucket.openvpn_bucket.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${var.service_account_email}"
+  source = each.value
 }
 
 output "bucket_name" {
