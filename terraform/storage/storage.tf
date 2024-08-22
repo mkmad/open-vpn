@@ -22,6 +22,7 @@ variable "ovpn_files" {
 resource "google_storage_bucket" "openvpn_bucket" {
   name     = "${var.bucket_name}-${var.project_id}"
   location = var.region
+  force_destroy = true
 }
 
 resource "google_storage_bucket_iam_member" "bucket_writer" {

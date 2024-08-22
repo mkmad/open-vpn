@@ -36,7 +36,7 @@ variable "bucket_name" {
 
 variable "ovpn_files" {
   description = "Map of OpenVPN configuration files to be downloaded"
-  type = map(string)
+  type        = map(string)
 }
 
 resource "google_compute_instance" "openvpn_instance" {
@@ -52,9 +52,11 @@ resource "google_compute_instance" "openvpn_instance" {
 
   network_interface {
     network = var.network_name
+    # No external IP assigned, forcing NAT for outbound traffic
 
     access_config {
       nat_ip = var.static_ip
+      network_tier = "PREMIUM"
     }
   }
 
@@ -66,24 +68,39 @@ resource "google_compute_instance" "openvpn_instance" {
   tags = [var.instance_tag]
 
   metadata_startup_script = <<-EOF
-    #cloud-config
-    runcmd:
-      - |
-        if [ ! -f /var/log/first-boot.log ]; then
-          sudo apt update
-          sudo apt install -y wget
-          mkdir -p /home/$(whoami)/open-vpn
+    #!/bin/bash
 
-          for file in ${join(" ", keys(var.ovpn_files))}; do
-            gsutil cp gs://${var.bucket_name}/$file /home/$(whoami)/open-vpn/
-          done
-          
-          cd /home/$(whoami)/open-vpn
-          sudo chmod +x setup_openvpn.sh
-          sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port} --bucket_name ${var.bucket_name}
-          sudo touch /var/log/first-boot.log
-        fi
-        sudo systemctl stop openvpn-server@server.service
-        sudo systemctl start openvpn-server@server.service        
+    # Enable IP forwarding
+    sysctl -w net.ipv4.ip_forward=1
+    echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+
+    # Set up NAT using iptables
+    EXTERNAL_INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
+    iptables -t nat -A POSTROUTING -o $EXTERNAL_INTERFACE -j MASQUERADE
+    iptables-save > /etc/iptables/rules.v4
+
+    # Install persistent iptables if not present
+    if ! dpkg -l | grep -qw iptables-persistent; then
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
+    fi
+
+    # Download OpenVPN configuration files from the bucket and set up OpenVPN
+    mkdir -p /home/$(whoami)/open-vpn
+    for file in ${join(" ", keys(var.ovpn_files))}; do
+      gsutil cp gs://${var.bucket_name}/$file /home/$(whoami)/open-vpn/
+    done
+
+    cd /home/$(whoami)/open-vpn
+    sudo chmod +x setup_openvpn.sh
+    sudo ./setup_openvpn.sh --clients 3 --server_ip ${var.static_ip} --server_port ${var.instance_port} --bucket_name ${var.bucket_name}
+    
+    # Restart OpenVPN to apply the configuration
+    sudo systemctl stop openvpn-server@server.service
+    sudo systemctl start openvpn-server@server.service
   EOF
+}
+
+output "instance_self_link" {
+  value = google_compute_instance.openvpn_instance.self_link
 }

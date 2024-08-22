@@ -15,12 +15,9 @@ resource "google_compute_firewall" "openvpn_firewall" {
     ports    = ["1194"]
   }
 
-  # allow from any IP address
   source_ranges = ["0.0.0.0/0"]
-
-  target_tags = [var.instance_tag]
-
-  direction = "INGRESS"
+  target_tags   = [var.instance_tag]
+  direction     = "INGRESS"
 }
 
 resource "google_compute_firewall" "openvpn_ssh_firewall" {
@@ -33,10 +30,8 @@ resource "google_compute_firewall" "openvpn_ssh_firewall" {
   }
 
   source_ranges = ["35.235.240.0/20"]
-
-  target_tags = [var.instance_tag]
-
-  direction = "INGRESS"
+  target_tags   = [var.instance_tag]
+  direction     = "INGRESS"
 }
 
 resource "google_compute_firewall" "allow-outbound-traffic" {
@@ -45,17 +40,16 @@ resource "google_compute_firewall" "allow-outbound-traffic" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "22", "5000", "3478", "5349", "8883", "12121"]
+    ports    = ["80", "443", "22", "1194", "5000", "3478", "5349", "8883", "12121"]
   }
 
   allow {
     protocol = "udp"
-    ports    = ["3478", "5349", "8883", "12121"]
+    ports    = ["1194", "3478", "5349", "8883", "12121"]
   }
 
-  direction = "EGRESS"
-  target_tags = [var.instance_tag]
-
+  direction     = "EGRESS"
+  target_tags   = [var.instance_tag]
   destination_ranges = ["0.0.0.0/0"]
 }
 
@@ -68,10 +62,8 @@ resource "google_compute_firewall" "allow-icmp" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-
-  target_tags = [var.instance_tag]
-
-  direction = "INGRESS"
+  target_tags   = [var.instance_tag]
+  direction     = "INGRESS"
 }
 
 resource "google_compute_firewall" "allow-multi-robot-comm" {
@@ -84,10 +76,8 @@ resource "google_compute_firewall" "allow-multi-robot-comm" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-
-  target_tags = [var.instance_tag]
-
-  direction = "INGRESS"
+  target_tags   = [var.instance_tag]
+  direction     = "INGRESS"
 }
 
 resource "google_compute_firewall" "allow-google-dns" {
@@ -104,9 +94,8 @@ resource "google_compute_firewall" "allow-google-dns" {
     ports    = ["53"]
   }
 
-  direction = "EGRESS"
-  target_tags = [var.instance_tag]
-
+  direction     = "EGRESS"
+  target_tags   = [var.instance_tag]
   destination_ranges = ["8.8.8.8", "8.8.4.4"]
 }
 

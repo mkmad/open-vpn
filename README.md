@@ -66,6 +66,8 @@ All the OpenVPN setup steps are taken care by the VM's **startup script** during
 
 Run the following script with the required parameters if you need to `recreate` the OpenVPN server or Client configuration files:
 
+**NOTE:** If you created the OpenVPN server using the `Terraform` module in this repo, then the `setup_openvpn.sh` file will be locacated in this path `/home/root/open-vpn`, use `sudo su` to switch to `root` user before executing the following script.
+
 ```sh
 ./setup_openvpn.sh \
     --clients <number_of_clients> \
@@ -113,6 +115,24 @@ First stop the openVPN server using the `systemctl` from above, modify the `serv
 
 ```sh
 openvpn --config <path to server.conf>
+```
+
+## Check which clients are currently connected to the OpenVPN server
+
+OpenVPN server maintains a connection log file, this file maintains all connection records. The current path is set to `/var/log/openvpn/openvpn-status.log`
+
+For ex, If you connected to the OpenVPN server (with IP `74.15.247.199`), the connection appear in the log file like this:
+
+```
+CLIENT_LIST,client-2967ee4e,74.15.247.199:51980,10.9.8.3,,49222,3926,Wed Aug 21 18:12:22 2024,1724263942,UNDEF,0,0
+```
+
+## Check OpenVPN Server logs
+
+OpenVPN server logs can be obtained using the following command
+
+```
+sudo journalctl -u openvpn-server@server.service -f
 ```
 
 ## Connect to OpenVPN server using the ovpn file from command line
