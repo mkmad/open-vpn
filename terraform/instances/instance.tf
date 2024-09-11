@@ -70,6 +70,12 @@ resource "google_compute_instance" "openvpn_instance" {
   metadata_startup_script = <<-EOF
     #!/bin/bash
 
+    # Install persistent iptables if not present
+    if ! dpkg -l | grep -qw iptables-persistent; then
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
+    fi
+    
     # Enable IP forwarding
     sysctl -w net.ipv4.ip_forward=1
     echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
@@ -78,12 +84,6 @@ resource "google_compute_instance" "openvpn_instance" {
     EXTERNAL_INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
     iptables -t nat -A POSTROUTING -o $EXTERNAL_INTERFACE -j MASQUERADE
     iptables-save > /etc/iptables/rules.v4
-
-    # Install persistent iptables if not present
-    if ! dpkg -l | grep -qw iptables-persistent; then
-      apt-get update
-      DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
-    fi
 
     # Download OpenVPN configuration files from the bucket and set up OpenVPN
     mkdir -p /home/$(whoami)/open-vpn
